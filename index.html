@@ -1,1264 +1,1400 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>공용 컴퓨터</title>
-  <style>
-:root {
-  --xp-blue: #245edb;
-  --xp-blue-dark: #123da0;
-  --xp-green: #3b9b24;
-  --panel: #ece9d8;
-  --border-light: #ffffff;
-  --border-mid: #9a9a9a;
-  --border-dark: #313131;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  overflow: hidden;
-  font-family: Tahoma, "Noto Sans KR", Arial, sans-serif;
-  background: #000;
-  color: #111;
-}
-
-button,
-input,
-textarea {
-  font: inherit;
-}
-
-button {
-  cursor: pointer;
-}
-
-.app,
-.screen {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.screen {
-  display: none;
-}
-
-.screen.is-visible {
-  display: block;
-}
-
-.boot-screen,
-.shutdown-screen {
-  background: #050505;
-  color: #fff;
-}
-
-.boot-screen.is-visible {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  gap: 26px;
-}
-
-.boot-logo {
-  display: grid;
-  grid-template-columns: repeat(2, 52px);
-  grid-template-rows: repeat(2, 42px);
-  gap: 5px;
-  transform: skewY(-6deg);
-  filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
-}
-
-.boot-logo .pane {
-  display: block;
-  border-radius: 2px;
-}
-
-.boot-logo .red { background: linear-gradient(135deg, #ff573b, #b82018); }
-.boot-logo .green { background: linear-gradient(135deg, #8edb2f, #3b8f18); }
-.boot-logo .blue { background: linear-gradient(135deg, #4cb8ff, #175fc3); }
-.boot-logo .yellow { background: linear-gradient(135deg, #ffd747, #e28c08); }
-
-.boot-copy {
-  margin: 0;
-  color: #d8d8d8;
-  font-size: 14px;
-}
-
-.boot-bar {
-  width: 210px;
-  height: 18px;
-  padding: 3px;
-  border: 1px solid #a5a5a5;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.boot-bar span {
-  display: block;
-  width: 68px;
-  height: 100%;
-  border-radius: 2px;
-  background: repeating-linear-gradient(90deg, #2169eb 0 12px, #164cb6 12px 18px);
-  animation: loading 1.05s linear infinite;
-}
-
-@keyframes loading {
-  from { transform: translateX(-78px); }
-  to { transform: translateX(220px); }
-}
-
-.login-screen {
-  background: linear-gradient(#4a7bdf 0 16%, #2c65c8 16% 83%, #1d4ea9 83% 100%);
-  color: #fff;
-}
-
-.login-screen.is-visible {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.login-screen::before,
-.login-screen::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.65);
-}
-
-.login-screen::before { top: 16%; }
-.login-screen::after { bottom: 17%; }
-
-.login-glow {
-  position: absolute;
-  inset: 16% 0 17%;
-  background: radial-gradient(circle at 50% 48%, rgba(255,255,255,.14), transparent 48%);
-}
-
-.login-card {
-  position: relative;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  gap: 26px;
-  width: min(650px, calc(100% - 40px));
-  padding: 32px 38px;
-  border-radius: 8px;
-  background: linear-gradient(90deg, rgba(15,66,165,.92), rgba(64,114,214,.78));
-  box-shadow: inset 0 1px rgba(255,255,255,.5), 0 10px 45px rgba(0,0,0,.22);
-}
-
-.user-avatar {
-  position: relative;
-  width: 104px;
-  height: 104px;
-  flex: 0 0 auto;
-  border: 3px solid #fff;
-  border-radius: 10px;
-  background: linear-gradient(#ebf4ff, #bcd3f2);
-  box-shadow: 0 0 0 2px #d4a83a;
-  overflow: hidden;
-}
-
-.avatar-head {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  left: 32px;
-  top: 18px;
-  border-radius: 50%;
-  background: #4d6d90;
-}
-
-.avatar-body {
-  position: absolute;
-  width: 78px;
-  height: 54px;
-  left: 13px;
-  bottom: -13px;
-  border-radius: 50% 50% 0 0;
-  background: #4d6d90;
-}
-
-.login-info {
-  width: 100%;
-}
-
-.eyebrow {
-  margin: 0 0 6px;
-  color: #dfeaff;
-  font-size: 11px;
-  letter-spacing: 2px;
-}
-
-.login-info h1 {
-  margin: 0 0 18px;
-  font-weight: 400;
-  font-size: clamp(27px, 5vw, 38px);
-  text-shadow: 1px 2px 2px rgba(0,0,0,.25);
-}
-
-.login-info label {
-  display: block;
-  margin-bottom: 6px;
-  font-size: 14px;
-}
-
-.password-form {
-  display: flex;
-  gap: 5px;
-}
-
-.password-form input {
-  width: min(310px, 100%);
-  height: 34px;
-  border: 2px solid #fff;
-  border-radius: 2px;
-  outline: none;
-  padding: 5px 8px;
-  box-shadow: inset 1px 1px 3px rgba(0,0,0,.35);
-}
-
-.password-form input:focus {
-  box-shadow: 0 0 0 2px #f4c851, inset 1px 1px 3px rgba(0,0,0,.35);
-}
-
-.password-form button {
-  width: 39px;
-  border: 2px solid #fff;
-  border-radius: 4px;
-  background: linear-gradient(#85db76, #2e9b2d);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 700;
-  text-shadow: 1px 1px #145719;
-}
-
-.login-message {
-  min-height: 20px;
-  margin: 8px 0 0;
-  color: #e9f0ff;
-  font-size: 12px;
-}
-
-.login-message.error {
-  color: #ffe9a9;
-  font-weight: 700;
-  animation: shake .2s linear 2;
-}
-
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(5px); }
-}
-
-.login-footer {
-  position: absolute;
-  left: 38px;
-  right: 38px;
-  bottom: 7%;
-  z-index: 1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: #e8efff;
-  font-size: 12px;
-}
-
-.power-button {
-  border: 0;
-  background: transparent;
-  color: #fff;
-  font-weight: 700;
-}
-
-.desktop {
-  overflow: hidden;
-  background: #69baf1;
-  user-select: none;
-}
-
-.desktop.is-visible {
-  display: block;
-}
-
-.wallpaper {
-  position: absolute;
-  inset: 0 0 40px;
-  overflow: hidden;
-  background: linear-gradient(#3ea7ed 0%, #86d0fb 58%, #7dcc58 58%, #4da437 100%);
-}
-
-.wallpaper::after {
-  content: "";
-  position: absolute;
-  left: -8%;
-  bottom: -16%;
-  width: 118%;
-  height: 55%;
-  border-radius: 50% 55% 0 0;
-  background: radial-gradient(ellipse at 45% 0%, #88df52 0 32%, #4ca335 67%, #377f2b 100%);
-  transform: rotate(-4deg);
-}
-
-.cloud {
-  position: absolute;
-  width: 180px;
-  height: 45px;
-  border-radius: 60px;
-  background: rgba(255,255,255,.9);
-  filter: blur(.3px);
-  box-shadow: 46px -18px 0 5px rgba(255,255,255,.88), 94px -5px 0 -2px rgba(255,255,255,.82);
-}
-
-.cloud-one { top: 12%; left: 18%; transform: scale(.75); }
-.cloud-two { top: 25%; right: 14%; transform: scale(.55); opacity: .75; }
-
-.hill {
-  position: absolute;
-  border-radius: 50% 50% 0 0;
-}
-
-.hill-back {
-  z-index: 1;
-  width: 72%;
-  height: 39%;
-  left: -18%;
-  bottom: 8%;
-  background: linear-gradient(110deg, #69c640, #4fae36);
-  transform: rotate(8deg);
-}
-
-.hill-front {
-  z-index: 2;
-  width: 96%;
-  height: 43%;
-  right: -24%;
-  bottom: -2%;
-  background: linear-gradient(120deg, #61bd3a, #32912c 72%);
-  transform: rotate(-7deg);
-}
-
-.desktop-icons {
-  position: relative;
-  z-index: 5;
-  display: grid;
-  width: 96px;
-  gap: 12px;
-  padding: 18px 10px;
-}
-
-.desktop-icon {
-  width: 80px;
-  min-height: 82px;
-  border: 1px solid transparent;
-  border-radius: 3px;
-  background: transparent;
-  color: #fff;
-  text-shadow: 1px 1px 2px #000;
-}
-
-.desktop-icon:hover,
-.desktop-icon:focus-visible {
-  border-color: rgba(255,255,255,.65);
-  background: rgba(39,86,165,.36);
-  outline: none;
-}
-
-.desktop-icon span:last-child {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.icon-art {
-  display: grid;
-  place-items: center;
-  width: 46px;
-  height: 46px;
-  margin: 0 auto;
-  filter: drop-shadow(1px 2px 1px rgba(0,0,0,.4));
-}
-
-.browser-icon {
-  border: 4px solid #f2ce25;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #70d4ff, #1a56ba 70%);
-  color: #fff;
-  font: italic 700 33px Georgia, serif;
-}
-
-.notepad-icon {
-  padding: 8px 5px;
-  border: 2px solid #225aa8;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #fff 0 80%, #c7daf7 80%);
-}
-
-.notepad-icon i {
-  width: 28px;
-  height: 2px;
-  margin: 3px;
-  background: #5d83a7;
-}
-
-.trash-icon {
-  border: 3px solid #d8e6ef;
-  border-radius: 6px 6px 10px 10px;
-  background: linear-gradient(#eef8ff, #86a9be);
-  color: #276584;
-  font-size: 31px;
-}
-
-.window {
-  position: absolute;
-  z-index: 20;
-  display: none;
-  min-width: 280px;
-  border: 3px solid #1858c9;
-  border-radius: 8px 8px 3px 3px;
-  background: var(--panel);
-  box-shadow: 5px 8px 22px rgba(0,0,0,.35);
-  overflow: hidden;
-}
-
-.window.is-open {
-  display: block;
-}
-
-.window.is-active {
-  z-index: 40;
-}
-
-.browser-window {
-  top: 11%;
-  left: 20%;
-  width: min(660px, 72vw);
-  height: min(450px, 65vh);
-}
-
-.notepad-window {
-  top: 17%;
-  left: 31%;
-  width: min(600px, 66vw);
-  height: min(430px, 60vh);
-}
-
-.trash-window {
-  top: 24%;
-  left: 42%;
-  width: min(520px, 60vw);
-  height: min(350px, 52vh);
-}
-
-.window-titlebar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  height: 32px;
-  padding: 3px 4px 3px 8px;
-  background: linear-gradient(#3e8ff0 0%, #1965d8 38%, #0e4dbd 100%);
-  color: #fff;
-  font-size: 13px;
-  font-weight: 700;
-  text-shadow: 1px 1px #0b2d79;
-  cursor: move;
-}
-
-.window-title {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.window-controls {
-  display: flex;
-  gap: 3px;
-}
-
-.window-controls button {
-  width: 25px;
-  height: 23px;
-  padding: 0;
-  border: 1px solid #fff;
-  border-radius: 3px;
-  background: linear-gradient(#6fa7ff, #1b59bd);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 700;
-  line-height: 18px;
-}
-
-.window-controls button:last-child {
-  background: linear-gradient(#ff9d85, #d73c25 55%, #a72013);
-}
-
-.mini-browser {
-  display: grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border: 2px solid #f8d927;
-  border-radius: 50%;
-  color: white;
-  background: #2270ce;
-  font: italic 700 14px Georgia, serif;
-}
-
-.browser-toolbar,
-.notepad-menu,
-.trash-toolbar {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  padding: 5px;
-  border-bottom: 1px solid #9c9a8f;
-  background: #ece9d8;
-}
-
-.browser-toolbar button,
-.trash-toolbar button,
-.classic-button {
-  min-width: 31px;
-  height: 26px;
-  border: 1px solid #7e7e7e;
-  border-radius: 2px;
-  background: linear-gradient(#fff, #d8d8d8);
-}
-
-.address-bar {
-  flex: 1;
-  height: 26px;
-  padding: 5px 8px;
-  border: 1px inset #b0b0b0;
-  background: #fff;
-  color: #777;
-  font-size: 12px;
-}
-
-.window-content {
-  height: calc(100% - 64px);
-  background: #fff;
-}
-
-.browser-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 30px;
-  text-align: center;
-}
-
-.offline-icon {
-  display: grid;
-  place-items: center;
-  width: 58px;
-  height: 58px;
-  border: 4px solid #d04444;
-  border-radius: 50%;
-  color: #d04444;
-  font-size: 34px;
-  font-weight: 700;
-}
-
-.browser-content h2 {
-  margin: 16px 0 6px;
-  font-size: 21px;
-}
-
-.browser-content p {
-  margin: 5px 0 16px;
-  color: #555;
-  font-size: 13px;
-}
-
-.diagnose-result {
-  min-height: 20px;
-  color: #9b2020 !important;
-}
-
-.notepad-menu {
-  height: 28px;
-  padding: 0 4px;
-}
-
-.notepad-menu button {
-  height: 24px;
-  border: 0;
-  background: transparent;
-  font-size: 12px;
-}
-
-.notepad-menu button:hover {
-  background: #c9d9f1;
-}
-
-.notepad-window textarea {
-  width: 100%;
-  height: calc(100% - 60px);
-  padding: 10px;
-  border: 0;
-  outline: none;
-  resize: none;
-  background: #fff;
-  color: #111;
-  font-family: "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.55;
-  user-select: text;
-}
-
-.trash-content {
-  height: calc(100% - 65px);
-  padding: 12px;
-  background: #fff;
-}
-
-.file-row {
-  display: grid;
-  grid-template-columns: 36px 1fr 70px;
-  align-items: center;
-  padding: 7px;
-  border-bottom: 1px solid #ddd;
-  font-size: 13px;
-}
-
-.file-row:hover {
-  background: #dceaff;
-}
-
-.file-icon {
-  font-size: 23px;
-}
-
-.trash-message {
-  color: #555;
-  font-size: 13px;
-}
-
-.start-menu {
-  position: absolute;
-  z-index: 100;
-  left: 0;
-  bottom: 40px;
-  display: none;
-  width: 260px;
-  border: 2px solid #0d4bb7;
-  border-radius: 7px 7px 0 0;
-  background: #f3f3f3;
-  box-shadow: 4px -4px 15px rgba(0,0,0,.25);
-  overflow: hidden;
-}
-
-.start-menu.is-open {
-  display: block;
-}
-
-.start-menu-brand {
-  padding: 16px;
-  background: linear-gradient(#3f91ef, #165aca);
-  color: #fff;
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.start-menu button {
-  display: block;
-  width: 100%;
-  padding: 11px 15px;
-  border: 0;
-  border-bottom: 1px solid #ddd;
-  background: #fff;
-  text-align: left;
-}
-
-.start-menu button:hover {
-  background: #dceaff;
-}
-
-.start-menu .menu-logout {
-  background: #e6effc;
-  font-weight: 700;
-}
-
-.taskbar {
-  position: absolute;
-  z-index: 90;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  display: flex;
-  align-items: stretch;
-  height: 40px;
-  background: linear-gradient(#2e85e8 0%, #1f67d3 16%, #1857bd 82%, #0b3c9e 100%);
-  box-shadow: inset 0 1px rgba(255,255,255,.65);
-}
-
-.start-button {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  width: 105px;
-  border: 0;
-  border-radius: 0 14px 14px 0;
-  background: linear-gradient(#58bd5d, #2f9b36 55%, #197522);
-  color: #fff;
-  font-size: 15px;
-  font-style: italic;
-  font-weight: 700;
-  text-shadow: 1px 1px #15591a;
-  box-shadow: inset -2px 0 3px rgba(0,0,0,.25), inset 0 1px rgba(255,255,255,.65);
-}
-
-.tiny-logo {
-  display: grid;
-  grid-template-columns: repeat(2, 9px);
-  gap: 1px;
-  transform: skewY(-7deg);
-}
-
-.tiny-logo i {
-  width: 9px;
-  height: 8px;
-}
-
-.tiny-logo i:nth-child(1) { background: #ef4b35; }
-.tiny-logo i:nth-child(2) { background: #70b92d; }
-.tiny-logo i:nth-child(3) { background: #35a0e8; }
-.tiny-logo i:nth-child(4) { background: #f2d147; }
-
-.task-buttons {
-  display: flex;
-  flex: 1;
-  gap: 3px;
-  padding: 4px 6px;
-  overflow: hidden;
-}
-
-.task-button {
-  width: min(185px, 24vw);
-  padding: 0 10px;
-  border: 1px solid #0f3e97;
-  border-radius: 3px;
-  overflow: hidden;
-  background: linear-gradient(#4289df, #1c63c5);
-  color: #fff;
-  text-align: left;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.task-button.is-active {
-  background: linear-gradient(#164e9c, #2f75cf);
-  box-shadow: inset 1px 1px 3px rgba(0,0,0,.35);
-}
-
-.system-tray {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  min-width: 104px;
-  padding: 0 11px;
-  border-left: 1px solid rgba(255,255,255,.42);
-  background: linear-gradient(#49b9ea, #1585cc);
-  color: #fff;
-  font-size: 12px;
-}
-
-.shutdown-screen.is-visible {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  background: #102b73;
-  color: #fff;
-  font-size: clamp(18px, 3vw, 26px);
-}
-
-.shutdown-screen button {
-  padding: 8px 16px;
-  border: 1px solid #fff;
-  border-radius: 4px;
-  background: linear-gradient(#e9f2ff, #9cb9e4);
-  color: #16356f;
-}
-
-@media (max-width: 700px) {
-  .login-card {
-    gap: 15px;
-    padding: 24px 20px;
-  }
-
-  .user-avatar {
-    width: 82px;
-    height: 82px;
-  }
-
-  .avatar-head {
-    left: 24px;
-    top: 12px;
-    width: 34px;
-    height: 34px;
-  }
-
-  .avatar-body {
-    left: 8px;
-    width: 66px;
-  }
-
-  .browser-window,
-  .notepad-window,
-  .trash-window {
-    top: 8%;
-    left: 8%;
-    width: 84vw;
-    height: 65vh;
-  }
-
-  .login-footer {
-    left: 18px;
-    right: 18px;
-  }
-}
-
-  </style>
-</head>
-<body>
-  <main id="app" class="app" aria-live="polite">
-    <section id="bootScreen" class="screen boot-screen is-visible" aria-label="컴퓨터 부팅 화면">
-      <div class="boot-logo" aria-hidden="true">
-        <span class="pane red"></span>
-        <span class="pane green"></span>
-        <span class="pane blue"></span>
-        <span class="pane yellow"></span>
-      </div>
-      <p class="boot-copy">시스템을 시작하는 중입니다...</p>
-      <div class="boot-bar"><span></span></div>
-    </section>
-
-    <section id="loginScreen" class="screen login-screen" aria-label="비밀번호 입력 화면">
-      <div class="login-glow"></div>
-      <div class="login-card">
-        <div class="user-avatar" aria-hidden="true">
-          <div class="avatar-head"></div>
-          <div class="avatar-body"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>공용 컴퓨터</title>
+    <style>
+      :root {
+        --xp-blue: #245edb;
+        --xp-blue-dark: #123da0;
+        --xp-green: #3b9b24;
+        --panel: #ece9d8;
+        --border-light: #ffffff;
+        --border-mid: #9a9a9a;
+        --border-dark: #313131;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        overflow: hidden;
+        font-family: Tahoma, "Noto Sans KR", Arial, sans-serif;
+        background: #000;
+        color: #111;
+      }
+
+      button,
+      input,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app,
+      .screen {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+      }
+
+      .screen {
+        display: none;
+      }
+
+      .screen.is-visible {
+        display: block;
+      }
+
+      .boot-screen,
+      .shutdown-screen {
+        background: #050505;
+        color: #fff;
+      }
+
+      .boot-screen.is-visible {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 26px;
+      }
+
+      .boot-logo {
+        display: grid;
+        grid-template-columns: repeat(2, 52px);
+        grid-template-rows: repeat(2, 42px);
+        gap: 5px;
+        transform: skewY(-6deg);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.25));
+      }
+
+      .boot-logo .pane {
+        display: block;
+        border-radius: 2px;
+      }
+
+      .boot-logo .red {
+        background: linear-gradient(135deg, #ff573b, #b82018);
+      }
+      .boot-logo .green {
+        background: linear-gradient(135deg, #8edb2f, #3b8f18);
+      }
+      .boot-logo .blue {
+        background: linear-gradient(135deg, #4cb8ff, #175fc3);
+      }
+      .boot-logo .yellow {
+        background: linear-gradient(135deg, #ffd747, #e28c08);
+      }
+
+      .boot-copy {
+        margin: 0;
+        color: #d8d8d8;
+        font-size: 14px;
+      }
+
+      .boot-bar {
+        width: 210px;
+        height: 18px;
+        padding: 3px;
+        border: 1px solid #a5a5a5;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .boot-bar span {
+        display: block;
+        width: 68px;
+        height: 100%;
+        border-radius: 2px;
+        background: repeating-linear-gradient(
+          90deg,
+          #2169eb 0 12px,
+          #164cb6 12px 18px
+        );
+        animation: loading 1.05s linear infinite;
+      }
+
+      @keyframes loading {
+        from {
+          transform: translateX(-78px);
+        }
+        to {
+          transform: translateX(220px);
+        }
+      }
+
+      .login-screen {
+        background: linear-gradient(
+          #4a7bdf 0 16%,
+          #2c65c8 16% 83%,
+          #1d4ea9 83% 100%
+        );
+        color: #fff;
+      }
+
+      .login-screen.is-visible {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-screen::before,
+      .login-screen::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.65);
+      }
+
+      .login-screen::before {
+        top: 16%;
+      }
+      .login-screen::after {
+        bottom: 17%;
+      }
+
+      .login-glow {
+        position: absolute;
+        inset: 16% 0 17%;
+        background: radial-gradient(
+          circle at 50% 48%,
+          rgba(255, 255, 255, 0.14),
+          transparent 48%
+        );
+      }
+
+      .login-card {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 26px;
+        width: min(650px, calc(100% - 40px));
+        padding: 32px 38px;
+        border-radius: 8px;
+        background: linear-gradient(
+          90deg,
+          rgba(15, 66, 165, 0.92),
+          rgba(64, 114, 214, 0.78)
+        );
+        box-shadow:
+          inset 0 1px rgba(255, 255, 255, 0.5),
+          0 10px 45px rgba(0, 0, 0, 0.22);
+      }
+
+      .user-avatar {
+        position: relative;
+        width: 104px;
+        height: 104px;
+        flex: 0 0 auto;
+        border: 3px solid #fff;
+        border-radius: 10px;
+        background: linear-gradient(#ebf4ff, #bcd3f2);
+        box-shadow: 0 0 0 2px #d4a83a;
+        overflow: hidden;
+      }
+
+      .avatar-head {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        left: 32px;
+        top: 18px;
+        border-radius: 50%;
+        background: #4d6d90;
+      }
+
+      .avatar-body {
+        position: absolute;
+        width: 78px;
+        height: 54px;
+        left: 13px;
+        bottom: -13px;
+        border-radius: 50% 50% 0 0;
+        background: #4d6d90;
+      }
+
+      .login-info {
+        width: 100%;
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        color: #dfeaff;
+        font-size: 11px;
+        letter-spacing: 2px;
+      }
+
+      .login-info h1 {
+        margin: 0 0 18px;
+        font-weight: 400;
+        font-size: clamp(27px, 5vw, 38px);
+        text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.25);
+      }
+
+      .login-info label {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 14px;
+      }
+
+      .password-form {
+        display: flex;
+        gap: 5px;
+      }
+
+      .password-form input {
+        width: min(310px, 100%);
+        height: 34px;
+        border: 2px solid #fff;
+        border-radius: 2px;
+        outline: none;
+        padding: 5px 8px;
+        box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.35);
+      }
+
+      .password-form input:focus {
+        box-shadow:
+          0 0 0 2px #f4c851,
+          inset 1px 1px 3px rgba(0, 0, 0, 0.35);
+      }
+
+      .password-form button {
+        width: 39px;
+        border: 2px solid #fff;
+        border-radius: 4px;
+        background: linear-gradient(#85db76, #2e9b2d);
+        color: #fff;
+        font-size: 22px;
+        font-weight: 700;
+        text-shadow: 1px 1px #145719;
+      }
+
+      .login-message {
+        min-height: 20px;
+        margin: 8px 0 0;
+        color: #e9f0ff;
+        font-size: 12px;
+      }
+
+      .login-message.error {
+        color: #ffe9a9;
+        font-weight: 700;
+        animation: shake 0.2s linear 2;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        50% {
+          transform: translateX(5px);
+        }
+      }
+
+      .login-footer {
+        position: absolute;
+        left: 38px;
+        right: 38px;
+        bottom: 7%;
+        z-index: 1;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #e8efff;
+        font-size: 12px;
+      }
+
+      .power-button {
+        border: 0;
+        background: transparent;
+        color: #fff;
+        font-weight: 700;
+      }
+
+      .desktop {
+        overflow: hidden;
+        background: #69baf1;
+        user-select: none;
+      }
+
+      .desktop.is-visible {
+        display: block;
+      }
+
+      .wallpaper {
+        position: absolute;
+        inset: 0 0 40px;
+        overflow: hidden;
+        background: linear-gradient(
+          #3ea7ed 0%,
+          #86d0fb 58%,
+          #7dcc58 58%,
+          #4da437 100%
+        );
+      }
+
+      .wallpaper::after {
+        content: "";
+        position: absolute;
+        left: -8%;
+        bottom: -16%;
+        width: 118%;
+        height: 55%;
+        border-radius: 50% 55% 0 0;
+        background: radial-gradient(
+          ellipse at 45% 0%,
+          #88df52 0 32%,
+          #4ca335 67%,
+          #377f2b 100%
+        );
+        transform: rotate(-4deg);
+      }
+
+      .cloud {
+        position: absolute;
+        width: 180px;
+        height: 45px;
+        border-radius: 60px;
+        background: rgba(255, 255, 255, 0.9);
+        filter: blur(0.3px);
+        box-shadow:
+          46px -18px 0 5px rgba(255, 255, 255, 0.88),
+          94px -5px 0 -2px rgba(255, 255, 255, 0.82);
+      }
+
+      .cloud-one {
+        top: 12%;
+        left: 18%;
+        transform: scale(0.75);
+      }
+      .cloud-two {
+        top: 25%;
+        right: 14%;
+        transform: scale(0.55);
+        opacity: 0.75;
+      }
+
+      .hill {
+        position: absolute;
+        border-radius: 50% 50% 0 0;
+      }
+
+      .hill-back {
+        z-index: 1;
+        width: 72%;
+        height: 39%;
+        left: -18%;
+        bottom: 8%;
+        background: linear-gradient(110deg, #69c640, #4fae36);
+        transform: rotate(8deg);
+      }
+
+      .hill-front {
+        z-index: 2;
+        width: 96%;
+        height: 43%;
+        right: -24%;
+        bottom: -2%;
+        background: linear-gradient(120deg, #61bd3a, #32912c 72%);
+        transform: rotate(-7deg);
+      }
+
+      .desktop-icons {
+        position: relative;
+        z-index: 5;
+        display: grid;
+        width: 96px;
+        gap: 12px;
+        padding: 18px 10px;
+      }
+
+      .desktop-icon {
+        width: 80px;
+        min-height: 82px;
+        border: 1px solid transparent;
+        border-radius: 3px;
+        background: transparent;
+        color: #fff;
+        text-shadow: 1px 1px 2px #000;
+      }
+
+      .desktop-icon:hover,
+      .desktop-icon:focus-visible {
+        border-color: rgba(255, 255, 255, 0.65);
+        background: rgba(39, 86, 165, 0.36);
+        outline: none;
+      }
+
+      .desktop-icon span:last-child {
+        display: block;
+        margin-top: 5px;
+        font-size: 12px;
+      }
+
+      .icon-art {
+        display: grid;
+        place-items: center;
+        width: 46px;
+        height: 46px;
+        margin: 0 auto;
+        filter: drop-shadow(1px 2px 1px rgba(0, 0, 0, 0.4));
+      }
+
+      .browser-icon {
+        border: 4px solid #f2ce25;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 35%, #70d4ff, #1a56ba 70%);
+        color: #fff;
+        font:
+          italic 700 33px Georgia,
+          serif;
+      }
+
+      .notepad-icon {
+        padding: 8px 5px;
+        border: 2px solid #225aa8;
+        border-radius: 2px;
+        background: linear-gradient(90deg, #fff 0 80%, #c7daf7 80%);
+      }
+
+      .notepad-icon i {
+        width: 28px;
+        height: 2px;
+        margin: 3px;
+        background: #5d83a7;
+      }
+
+      .trash-icon {
+        border: 3px solid #d8e6ef;
+        border-radius: 6px 6px 10px 10px;
+        background: linear-gradient(#eef8ff, #86a9be);
+        color: #276584;
+        font-size: 31px;
+      }
+
+      .window {
+        position: absolute;
+        z-index: 20;
+        display: none;
+        min-width: 280px;
+        border: 3px solid #1858c9;
+        border-radius: 8px 8px 3px 3px;
+        background: var(--panel);
+        box-shadow: 5px 8px 22px rgba(0, 0, 0, 0.35);
+        overflow: hidden;
+      }
+
+      .window.is-open {
+        display: block;
+      }
+
+      .window.is-active {
+        z-index: 40;
+      }
+
+      .browser-window {
+        top: 11%;
+        left: 20%;
+        width: min(660px, 72vw);
+        height: min(450px, 65vh);
+      }
+
+      .notepad-window {
+        top: 17%;
+        left: 31%;
+        width: min(600px, 66vw);
+        height: min(430px, 60vh);
+      }
+
+      .trash-window {
+        top: 24%;
+        left: 42%;
+        width: min(520px, 60vw);
+        height: min(350px, 52vh);
+      }
+
+      .window-titlebar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        height: 32px;
+        padding: 3px 4px 3px 8px;
+        background: linear-gradient(#3e8ff0 0%, #1965d8 38%, #0e4dbd 100%);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        text-shadow: 1px 1px #0b2d79;
+        cursor: move;
+      }
+
+      .window-title {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 3px;
+      }
+
+      .window-controls button {
+        width: 25px;
+        height: 23px;
+        padding: 0;
+        border: 1px solid #fff;
+        border-radius: 3px;
+        background: linear-gradient(#6fa7ff, #1b59bd);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        line-height: 18px;
+      }
+
+      .window-controls button:last-child {
+        background: linear-gradient(#ff9d85, #d73c25 55%, #a72013);
+      }
+
+      .mini-browser {
+        display: grid;
+        place-items: center;
+        width: 18px;
+        height: 18px;
+        border: 2px solid #f8d927;
+        border-radius: 50%;
+        color: white;
+        background: #2270ce;
+        font:
+          italic 700 14px Georgia,
+          serif;
+      }
+
+      .browser-toolbar,
+      .notepad-menu,
+      .trash-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 5px;
+        border-bottom: 1px solid #9c9a8f;
+        background: #ece9d8;
+      }
+
+      .browser-toolbar button,
+      .trash-toolbar button,
+      .classic-button {
+        min-width: 31px;
+        height: 26px;
+        border: 1px solid #7e7e7e;
+        border-radius: 2px;
+        background: linear-gradient(#fff, #d8d8d8);
+      }
+
+      .address-bar {
+        flex: 1;
+        height: 26px;
+        padding: 5px 8px;
+        border: 1px inset #b0b0b0;
+        background: #fff;
+        color: #777;
+        font-size: 12px;
+      }
+
+      .window-content {
+        height: calc(100% - 64px);
+        background: #fff;
+      }
+
+      .browser-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .offline-icon {
+        display: grid;
+        place-items: center;
+        width: 58px;
+        height: 58px;
+        border: 4px solid #d04444;
+        border-radius: 50%;
+        color: #d04444;
+        font-size: 34px;
+        font-weight: 700;
+      }
+
+      .browser-content h2 {
+        margin: 16px 0 6px;
+        font-size: 21px;
+      }
+
+      .browser-content p {
+        margin: 5px 0 16px;
+        color: #555;
+        font-size: 13px;
+      }
+
+      .diagnose-result {
+        min-height: 20px;
+        color: #9b2020 !important;
+      }
+
+      .notepad-menu {
+        height: 28px;
+        padding: 0 4px;
+      }
+
+      .notepad-menu button {
+        height: 24px;
+        border: 0;
+        background: transparent;
+        font-size: 12px;
+      }
+
+      .notepad-menu button:hover {
+        background: #c9d9f1;
+      }
+
+      .notepad-window textarea {
+        width: 100%;
+        height: calc(100% - 60px);
+        padding: 10px;
+        border: 0;
+        outline: none;
+        resize: none;
+        background: #fff;
+        color: #111;
+        font-family: "Courier New", monospace;
+        font-size: 14px;
+        line-height: 1.55;
+        user-select: text;
+      }
+
+      .trash-content {
+        height: calc(100% - 65px);
+        padding: 12px;
+        background: #fff;
+      }
+
+      .file-row {
+        display: grid;
+        grid-template-columns: 36px 1fr 70px;
+        align-items: center;
+        padding: 7px;
+        border-bottom: 1px solid #ddd;
+        font-size: 13px;
+      }
+
+      .file-row:hover {
+        background: #dceaff;
+      }
+
+      .file-icon {
+        font-size: 23px;
+      }
+
+      .trash-message {
+        color: #555;
+        font-size: 13px;
+      }
+
+      .start-menu {
+        position: absolute;
+        z-index: 100;
+        left: 0;
+        bottom: 40px;
+        display: none;
+        width: 260px;
+        border: 2px solid #0d4bb7;
+        border-radius: 7px 7px 0 0;
+        background: #f3f3f3;
+        box-shadow: 4px -4px 15px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+      }
+
+      .start-menu.is-open {
+        display: block;
+      }
+
+      .start-menu-brand {
+        padding: 16px;
+        background: linear-gradient(#3f91ef, #165aca);
+        color: #fff;
+        font-size: 18px;
+        font-weight: 700;
+      }
+
+      .start-menu button {
+        display: block;
+        width: 100%;
+        padding: 11px 15px;
+        border: 0;
+        border-bottom: 1px solid #ddd;
+        background: #fff;
+        text-align: left;
+      }
+
+      .start-menu button:hover {
+        background: #dceaff;
+      }
+
+      .start-menu .menu-logout {
+        background: #e6effc;
+        font-weight: 700;
+      }
+
+      .taskbar {
+        position: absolute;
+        z-index: 90;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        align-items: stretch;
+        height: 40px;
+        background: linear-gradient(
+          #2e85e8 0%,
+          #1f67d3 16%,
+          #1857bd 82%,
+          #0b3c9e 100%
+        );
+        box-shadow: inset 0 1px rgba(255, 255, 255, 0.65);
+      }
+
+      .start-button {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        width: 105px;
+        border: 0;
+        border-radius: 0 14px 14px 0;
+        background: linear-gradient(#58bd5d, #2f9b36 55%, #197522);
+        color: #fff;
+        font-size: 15px;
+        font-style: italic;
+        font-weight: 700;
+        text-shadow: 1px 1px #15591a;
+        box-shadow:
+          inset -2px 0 3px rgba(0, 0, 0, 0.25),
+          inset 0 1px rgba(255, 255, 255, 0.65);
+      }
+
+      .tiny-logo {
+        display: grid;
+        grid-template-columns: repeat(2, 9px);
+        gap: 1px;
+        transform: skewY(-7deg);
+      }
+
+      .tiny-logo i {
+        width: 9px;
+        height: 8px;
+      }
+
+      .tiny-logo i:nth-child(1) {
+        background: #ef4b35;
+      }
+      .tiny-logo i:nth-child(2) {
+        background: #70b92d;
+      }
+      .tiny-logo i:nth-child(3) {
+        background: #35a0e8;
+      }
+      .tiny-logo i:nth-child(4) {
+        background: #f2d147;
+      }
+
+      .task-buttons {
+        display: flex;
+        flex: 1;
+        gap: 3px;
+        padding: 4px 6px;
+        overflow: hidden;
+      }
+
+      .task-button {
+        width: min(185px, 24vw);
+        padding: 0 10px;
+        border: 1px solid #0f3e97;
+        border-radius: 3px;
+        overflow: hidden;
+        background: linear-gradient(#4289df, #1c63c5);
+        color: #fff;
+        text-align: left;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .task-button.is-active {
+        background: linear-gradient(#164e9c, #2f75cf);
+        box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.35);
+      }
+
+      .system-tray {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 104px;
+        padding: 0 11px;
+        border-left: 1px solid rgba(255, 255, 255, 0.42);
+        background: linear-gradient(#49b9ea, #1585cc);
+        color: #fff;
+        font-size: 12px;
+      }
+
+      .shutdown-screen.is-visible {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        background: #102b73;
+        color: #fff;
+        font-size: clamp(18px, 3vw, 26px);
+      }
+
+      .shutdown-screen button {
+        padding: 8px 16px;
+        border: 1px solid #fff;
+        border-radius: 4px;
+        background: linear-gradient(#e9f2ff, #9cb9e4);
+        color: #16356f;
+      }
+
+      @media (max-width: 700px) {
+        .login-card {
+          gap: 15px;
+          padding: 24px 20px;
+        }
+
+        .user-avatar {
+          width: 82px;
+          height: 82px;
+        }
+
+        .avatar-head {
+          left: 24px;
+          top: 12px;
+          width: 34px;
+          height: 34px;
+        }
+
+        .avatar-body {
+          left: 8px;
+          width: 66px;
+        }
+
+        .browser-window,
+        .notepad-window,
+        .trash-window {
+          top: 8%;
+          left: 8%;
+          width: 84vw;
+          height: 65vh;
+        }
+
+        .login-footer {
+          left: 18px;
+          right: 18px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="app" class="app" aria-live="polite">
+      <section
+        id="bootScreen"
+        class="screen boot-screen is-visible"
+        aria-label="컴퓨터 부팅 화면"
+      >
+        <div class="boot-logo" aria-hidden="true">
+          <span class="pane red"></span>
+          <span class="pane green"></span>
+          <span class="pane blue"></span>
+          <span class="pane yellow"></span>
         </div>
-        <div class="login-info">
-          <p class="eyebrow">SHARED COMPUTER</p>
-          <h1>공용 컴퓨터</h1>
-          <label for="passwordInput">비밀번호를 입력하세요.</label>
-          <form id="loginForm" class="password-form">
-            <input
-              id="passwordInput"
-              type="password"
-              autocomplete="off"
-              spellcheck="false"
-              aria-describedby="loginMessage"
-              placeholder="Password"
-            />
-            <button type="submit" aria-label="비밀번호 확인">➜</button>
-          </form>
-          <p id="loginMessage" class="login-message">힌트는 없습니다.</p>
-        </div>
-      </div>
-      <div class="login-footer">
-        <button id="powerButton" class="power-button" type="button">● 종료</button>
-        <span>알 수 없는 연구실 · 공용 PC</span>
-      </div>
-    </section>
+        <p class="boot-copy">시스템을 시작하는 중입니다...</p>
+        <div class="boot-bar"><span></span></div>
+      </section>
 
-    <section id="desktop" class="screen desktop" aria-label="컴퓨터 바탕화면">
-      <div class="wallpaper" aria-hidden="true">
-        <div class="cloud cloud-one"></div>
-        <div class="cloud cloud-two"></div>
-        <div class="hill hill-back"></div>
-        <div class="hill hill-front"></div>
-      </div>
-
-      <div class="desktop-icons" aria-label="바탕화면 아이콘">
-        <button class="desktop-icon" type="button" data-open="internetWindow">
-          <span class="icon-art browser-icon">e</span>
-          <span>인터넷</span>
-        </button>
-        <button class="desktop-icon" type="button" data-open="notepadWindow">
-          <span class="icon-art notepad-icon"><i></i><i></i><i></i></span>
-          <span>메모장</span>
-        </button>
-        <button class="desktop-icon" type="button" data-open="trashWindow">
-          <span class="icon-art trash-icon">♲</span>
-          <span>휴지통</span>
-        </button>
-      </div>
-
-      <section id="internetWindow" class="window browser-window" data-window aria-label="인터넷 창">
-        <header class="window-titlebar" data-drag-handle>
-          <div class="window-title"><span class="mini-browser">e</span> 인터넷</div>
-          <div class="window-controls">
-            <button type="button" data-minimize aria-label="최소화">—</button>
-            <button type="button" data-close aria-label="닫기">×</button>
+      <section
+        id="loginScreen"
+        class="screen login-screen"
+        aria-label="비밀번호 입력 화면"
+      >
+        <div class="login-glow"></div>
+        <div class="login-card">
+          <div class="user-avatar" aria-hidden="true">
+            <div class="avatar-head"></div>
+            <div class="avatar-body"></div>
           </div>
-        </header>
-        <div class="browser-toolbar">
-          <button type="button" disabled>←</button>
-          <button type="button" disabled>→</button>
-          <button type="button" disabled>↻</button>
-          <div class="address-bar">http://</div>
-          <button type="button" id="searchButton">이동</button>
+          <div class="login-info">
+            <p class="eyebrow">SHARED COMPUTER</p>
+            <h1>공용 컴퓨터</h1>
+            <label for="passwordInput">비밀번호를 입력하세요.</label>
+            <form id="loginForm" class="password-form">
+              <input
+                id="passwordInput"
+                type="password"
+                autocomplete="off"
+                spellcheck="false"
+                aria-describedby="loginMessage"
+                placeholder="Password"
+              />
+              <button type="submit" aria-label="비밀번호 확인">➜</button>
+            </form>
+            <p id="loginMessage" class="login-message">힌트는 없습니다.</p>
+          </div>
         </div>
-        <div class="window-content browser-content">
-          <div class="offline-icon">✕</div>
-          <h2>페이지를 표시할 수 없습니다.</h2>
-          <p>인터넷에 연결되어 있지 않습니다.</p>
-          <button id="diagnoseButton" class="classic-button" type="button">연결 문제 진단</button>
-          <p id="diagnoseResult" class="diagnose-result"></p>
+        <div class="login-footer">
+          <button id="powerButton" class="power-button" type="button">
+            ● 종료
+          </button>
+          <span>알 수 없는 연구실 · 공용 PC</span>
         </div>
       </section>
 
-      <section id="notepadWindow" class="window notepad-window" data-window aria-label="메모장 창">
-        <header class="window-titlebar" data-drag-handle>
-          <div class="window-title">📝 제목 없음 - 메모장</div>
-          <div class="window-controls">
-            <button type="button" data-minimize aria-label="최소화">—</button>
-            <button type="button" data-close aria-label="닫기">×</button>
+      <section id="desktop" class="screen desktop" aria-label="컴퓨터 바탕화면">
+        <div class="wallpaper" aria-hidden="true">
+          <div class="cloud cloud-one"></div>
+          <div class="cloud cloud-two"></div>
+          <div class="hill hill-back"></div>
+          <div class="hill hill-front"></div>
+        </div>
+
+        <div class="desktop-icons" aria-label="바탕화면 아이콘">
+          <button class="desktop-icon" type="button" data-open="internetWindow">
+            <span class="icon-art browser-icon">e</span>
+            <span>인터넷</span>
+          </button>
+          <button class="desktop-icon" type="button" data-open="notepadWindow">
+            <span class="icon-art notepad-icon"><i></i><i></i><i></i></span>
+            <span>메모장</span>
+          </button>
+          <button class="desktop-icon" type="button" data-open="trashWindow">
+            <span class="icon-art trash-icon">♲</span>
+            <span>휴지통</span>
+          </button>
+        </div>
+
+        <section
+          id="internetWindow"
+          class="window browser-window"
+          data-window
+          aria-label="인터넷 창"
+        >
+          <header class="window-titlebar" data-drag-handle>
+            <div class="window-title">
+              <span class="mini-browser">e</span> 인터넷
+            </div>
+            <div class="window-controls">
+              <button type="button" data-minimize aria-label="최소화">—</button>
+              <button type="button" data-close aria-label="닫기">×</button>
+            </div>
+          </header>
+          <div class="browser-toolbar">
+            <button type="button" disabled>←</button>
+            <button type="button" disabled>→</button>
+            <button type="button" disabled>↻</button>
+            <div class="address-bar">http://</div>
+            <button type="button" id="searchButton">이동</button>
           </div>
-        </header>
-        <nav class="notepad-menu" aria-label="메모장 메뉴">
-          <button type="button">파일</button>
-          <button type="button">편집</button>
-          <button type="button">서식</button>
-          <button type="button">보기</button>
-          <button type="button">도움말</button>
-        </nav>
-        <textarea id="notepadText" aria-label="메모 내용" spellcheck="false">공용 PC 사용 기록
+          <div class="window-content browser-content">
+            <div class="offline-icon">✕</div>
+            <h2>페이지를 표시할 수 없습니다.</h2>
+            <p>인터넷에 연결되어 있지 않습니다.</p>
+            <button id="diagnoseButton" class="classic-button" type="button">
+              연결 문제 진단
+            </button>
+            <p id="diagnoseResult" class="diagnose-result"></p>
+          </div>
+        </section>
 
-인터넷은 연결되지 않는다.
-검색은 틀린 일 같다.
+        <section
+          id="notepadWindow"
+          class="window notepad-window"
+          data-window
+          aria-label="메모장 창"
+        >
+          <header class="window-titlebar" data-drag-handle>
+            <div class="window-title">📝 제목 없음 - 메모장</div>
+            <div class="window-controls">
+              <button type="button" data-minimize aria-label="최소화">—</button>
+              <button type="button" data-close aria-label="닫기">×</button>
+            </div>
+          </header>
+          <nav class="notepad-menu" aria-label="메모장 메뉴">
+            <button type="button">파일</button>
+            <button type="button">편집</button>
+            <button type="button">서식</button>
+            <button type="button">보기</button>
+            <button type="button">도움말</button>
+          </nav>
+          <textarea id="notepadText" aria-label="메모 내용" spellcheck="false">
+10년뒤에 다시만나자!</textarea
+          >
+        </section>
 
-흠…….
-인터넷이 되지 않는 컴퓨터란 이토록 쓸모없는 존재네요!</textarea>
+        <section
+          id="trashWindow"
+          class="window trash-window"
+          data-window
+          aria-label="휴지통 창"
+        >
+          <header class="window-titlebar" data-drag-handle>
+            <div class="window-title">🗑 휴지통</div>
+            <div class="window-controls">
+              <button type="button" data-minimize aria-label="최소화">—</button>
+              <button type="button" data-close aria-label="닫기">×</button>
+            </div>
+          </header>
+          <div class="trash-toolbar">
+            <button type="button" id="emptyTrashButton">휴지통 비우기</button>
+          </div>
+          <div class="trash-content">
+            <div class="file-row" id="trashFile">
+              <span class="file-icon">📄</span>
+              <span>삭제된_기록.txt</span>
+              <span>1KB</span>
+            </div>
+            <p id="trashMessage" class="trash-message"></p>
+          </div>
+        </section>
+
+        <div id="startMenu" class="start-menu" aria-hidden="true">
+          <div class="start-menu-brand">공용 컴퓨터</div>
+          <button type="button" data-open="notepadWindow">📝 메모장</button>
+          <button type="button" data-open="internetWindow">🌐 인터넷</button>
+          <button type="button" data-open="trashWindow">🗑 휴지통</button>
+          <button id="logoutButton" class="menu-logout" type="button">
+            🔒 로그오프
+          </button>
+        </div>
+
+        <footer class="taskbar">
+          <button id="startButton" class="start-button" type="button">
+            <span class="tiny-logo"><i></i><i></i><i></i><i></i></span>
+            시작
+          </button>
+          <div id="taskButtons" class="task-buttons"></div>
+          <div class="system-tray">
+            <span title="네트워크 연결 안 됨">⚠</span>
+            <time id="clock">00:00</time>
+          </div>
+        </footer>
       </section>
 
-      <section id="trashWindow" class="window trash-window" data-window aria-label="휴지통 창">
-        <header class="window-titlebar" data-drag-handle>
-          <div class="window-title">🗑 휴지통</div>
-          <div class="window-controls">
-            <button type="button" data-minimize aria-label="최소화">—</button>
-            <button type="button" data-close aria-label="닫기">×</button>
-          </div>
-        </header>
-        <div class="trash-toolbar">
-          <button type="button" id="emptyTrashButton">휴지통 비우기</button>
-        </div>
-        <div class="trash-content">
-          <div class="file-row" id="trashFile">
-            <span class="file-icon">📄</span>
-            <span>삭제된_기록.txt</span>
-            <span>1KB</span>
-          </div>
-          <p id="trashMessage" class="trash-message"></p>
-        </div>
+      <section
+        id="shutdownScreen"
+        class="screen shutdown-screen"
+        aria-label="종료 화면"
+      >
+        <p>이제 컴퓨터 전원을 끄셔도 됩니다.</p>
+        <button id="restartButton" type="button">다시 시작</button>
       </section>
+    </main>
 
-      <div id="startMenu" class="start-menu" aria-hidden="true">
-        <div class="start-menu-brand">공용 컴퓨터</div>
-        <button type="button" data-open="notepadWindow">📝 메모장</button>
-        <button type="button" data-open="internetWindow">🌐 인터넷</button>
-        <button type="button" data-open="trashWindow">🗑 휴지통</button>
-        <button id="logoutButton" class="menu-logout" type="button">🔒 로그오프</button>
-      </div>
+    <script>
+      const PASSWORD = "001a581zds";
 
-      <footer class="taskbar">
-        <button id="startButton" class="start-button" type="button">
-          <span class="tiny-logo"><i></i><i></i><i></i><i></i></span>
-          시작
-        </button>
-        <div id="taskButtons" class="task-buttons"></div>
-        <div class="system-tray">
-          <span title="네트워크 연결 안 됨">⚠</span>
-          <time id="clock">00:00</time>
-        </div>
-      </footer>
-    </section>
+      const screens = {
+        boot: document.getElementById("bootScreen"),
+        login: document.getElementById("loginScreen"),
+        desktop: document.getElementById("desktop"),
+        shutdown: document.getElementById("shutdownScreen"),
+      };
 
-    <section id="shutdownScreen" class="screen shutdown-screen" aria-label="종료 화면">
-      <p>이제 컴퓨터 전원을 끄셔도 됩니다.</p>
-      <button id="restartButton" type="button">다시 시작</button>
-    </section>
-  </main>
+      const loginForm = document.getElementById("loginForm");
+      const passwordInput = document.getElementById("passwordInput");
+      const loginMessage = document.getElementById("loginMessage");
+      const powerButton = document.getElementById("powerButton");
+      const restartButton = document.getElementById("restartButton");
+      const startButton = document.getElementById("startButton");
+      const startMenu = document.getElementById("startMenu");
+      const logoutButton = document.getElementById("logoutButton");
+      const taskButtons = document.getElementById("taskButtons");
+      const clock = document.getElementById("clock");
+      const diagnoseButton = document.getElementById("diagnoseButton");
+      const diagnoseResult = document.getElementById("diagnoseResult");
+      const emptyTrashButton = document.getElementById("emptyTrashButton");
+      const trashFile = document.getElementById("trashFile");
+      const trashMessage = document.getElementById("trashMessage");
 
-  <script>
-const PASSWORD = "001a581zds";
+      let topZIndex = 40;
 
-const screens = {
-  boot: document.getElementById("bootScreen"),
-  login: document.getElementById("loginScreen"),
-  desktop: document.getElementById("desktop"),
-  shutdown: document.getElementById("shutdownScreen"),
-};
+      function showScreen(screenName) {
+        Object.values(screens).forEach((screen) =>
+          screen.classList.remove("is-visible"),
+        );
+        screens[screenName].classList.add("is-visible");
+      }
 
-const loginForm = document.getElementById("loginForm");
-const passwordInput = document.getElementById("passwordInput");
-const loginMessage = document.getElementById("loginMessage");
-const powerButton = document.getElementById("powerButton");
-const restartButton = document.getElementById("restartButton");
-const startButton = document.getElementById("startButton");
-const startMenu = document.getElementById("startMenu");
-const logoutButton = document.getElementById("logoutButton");
-const taskButtons = document.getElementById("taskButtons");
-const clock = document.getElementById("clock");
-const diagnoseButton = document.getElementById("diagnoseButton");
-const diagnoseResult = document.getElementById("diagnoseResult");
-const emptyTrashButton = document.getElementById("emptyTrashButton");
-const trashFile = document.getElementById("trashFile");
-const trashMessage = document.getElementById("trashMessage");
+      function startBootSequence() {
+        showScreen("boot");
+        setTimeout(() => {
+          showScreen("login");
+          passwordInput.value = "";
+          loginMessage.textContent = "힌트는 없습니다.";
+          loginMessage.classList.remove("error");
+          setTimeout(() => passwordInput.focus(), 120);
+        }, 2200);
+      }
 
-let topZIndex = 40;
+      function unlockDesktop() {
+        loginMessage.textContent = "잠금 해제 중...";
+        loginMessage.classList.remove("error");
 
-function showScreen(screenName) {
-  Object.values(screens).forEach((screen) => screen.classList.remove("is-visible"));
-  screens[screenName].classList.add("is-visible");
-}
+        setTimeout(() => {
+          showScreen("desktop");
+          updateClock();
+        }, 650);
+      }
 
-function startBootSequence() {
-  showScreen("boot");
-  setTimeout(() => {
-    showScreen("login");
-    passwordInput.value = "";
-    loginMessage.textContent = "힌트는 없습니다.";
-    loginMessage.classList.remove("error");
-    setTimeout(() => passwordInput.focus(), 120);
-  }, 2200);
-}
+      loginForm.addEventListener("submit", (event) => {
+        event.preventDefault();
 
-function unlockDesktop() {
-  loginMessage.textContent = "잠금 해제 중...";
-  loginMessage.classList.remove("error");
+        if (passwordInput.value === PASSWORD) {
+          unlockDesktop();
+          return;
+        }
 
-  setTimeout(() => {
-    showScreen("desktop");
-    updateClock();
-  }, 650);
-}
+        loginMessage.textContent = "암호가 올바르지 않습니다. 다시 입력하세요.";
+        loginMessage.classList.add("error");
+        passwordInput.select();
+      });
 
-loginForm.addEventListener("submit", (event) => {
-  event.preventDefault();
+      powerButton.addEventListener("click", () => showScreen("shutdown"));
+      restartButton.addEventListener("click", startBootSequence);
+      logoutButton.addEventListener("click", () => {
+        closeStartMenu();
+        document.querySelectorAll("[data-window]").forEach(closeWindow);
+        showScreen("login");
+        passwordInput.value = "";
+        loginMessage.textContent = "힌트는 없습니다.";
+        passwordInput.focus();
+      });
 
-  if (passwordInput.value === PASSWORD) {
-    unlockDesktop();
-    return;
-  }
+      function updateClock() {
+        const now = new Date();
+        clock.textContent = now.toLocaleTimeString("ko-KR", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+        });
+      }
 
-  loginMessage.textContent = "암호가 올바르지 않습니다. 다시 입력하세요.";
-  loginMessage.classList.add("error");
-  passwordInput.select();
-});
+      setInterval(updateClock, 1000);
 
-powerButton.addEventListener("click", () => showScreen("shutdown"));
-restartButton.addEventListener("click", startBootSequence);
-logoutButton.addEventListener("click", () => {
-  closeStartMenu();
-  document.querySelectorAll("[data-window]").forEach(closeWindow);
-  showScreen("login");
-  passwordInput.value = "";
-  loginMessage.textContent = "힌트는 없습니다.";
-  passwordInput.focus();
-});
+      function closeStartMenu() {
+        startMenu.classList.remove("is-open");
+        startMenu.setAttribute("aria-hidden", "true");
+      }
 
-function updateClock() {
-  const now = new Date();
-  clock.textContent = now.toLocaleTimeString("ko-KR", {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-}
+      startButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const willOpen = !startMenu.classList.contains("is-open");
+        startMenu.classList.toggle("is-open", willOpen);
+        startMenu.setAttribute("aria-hidden", String(!willOpen));
+      });
 
-setInterval(updateClock, 1000);
+      document.addEventListener("click", (event) => {
+        if (!startMenu.contains(event.target) && event.target !== startButton) {
+          closeStartMenu();
+        }
+      });
 
-function closeStartMenu() {
-  startMenu.classList.remove("is-open");
-  startMenu.setAttribute("aria-hidden", "true");
-}
+      function getWindowTitle(windowElement) {
+        return (
+          windowElement.querySelector(".window-title")?.textContent.trim() ||
+          "창"
+        );
+      }
 
-startButton.addEventListener("click", (event) => {
-  event.stopPropagation();
-  const willOpen = !startMenu.classList.contains("is-open");
-  startMenu.classList.toggle("is-open", willOpen);
-  startMenu.setAttribute("aria-hidden", String(!willOpen));
-});
+      function focusWindow(windowElement) {
+        topZIndex += 1;
+        document
+          .querySelectorAll("[data-window]")
+          .forEach((item) => item.classList.remove("is-active"));
+        windowElement.classList.add("is-active");
+        windowElement.style.zIndex = String(topZIndex);
 
-document.addEventListener("click", (event) => {
-  if (!startMenu.contains(event.target) && event.target !== startButton) {
-    closeStartMenu();
-  }
-});
+        document.querySelectorAll(".task-button").forEach((button) => {
+          button.classList.toggle(
+            "is-active",
+            button.dataset.target === windowElement.id,
+          );
+        });
+      }
 
-function getWindowTitle(windowElement) {
-  return windowElement.querySelector(".window-title")?.textContent.trim() || "창";
-}
+      function createTaskButton(windowElement) {
+        if (taskButtons.querySelector(`[data-target="${windowElement.id}"]`))
+          return;
 
-function focusWindow(windowElement) {
-  topZIndex += 1;
-  document.querySelectorAll("[data-window]").forEach((item) => item.classList.remove("is-active"));
-  windowElement.classList.add("is-active");
-  windowElement.style.zIndex = String(topZIndex);
+        const taskButton = document.createElement("button");
+        taskButton.type = "button";
+        taskButton.className = "task-button is-active";
+        taskButton.dataset.target = windowElement.id;
+        taskButton.textContent = getWindowTitle(windowElement);
+        taskButton.addEventListener("click", () => {
+          if (!windowElement.classList.contains("is-open")) {
+            windowElement.classList.add("is-open");
+            focusWindow(windowElement);
+            return;
+          }
 
-  document.querySelectorAll(".task-button").forEach((button) => {
-    button.classList.toggle("is-active", button.dataset.target === windowElement.id);
-  });
-}
+          if (windowElement.classList.contains("is-active")) {
+            minimizeWindow(windowElement);
+          } else {
+            focusWindow(windowElement);
+          }
+        });
 
-function createTaskButton(windowElement) {
-  if (taskButtons.querySelector(`[data-target="${windowElement.id}"]`)) return;
+        taskButtons.appendChild(taskButton);
+      }
 
-  const taskButton = document.createElement("button");
-  taskButton.type = "button";
-  taskButton.className = "task-button is-active";
-  taskButton.dataset.target = windowElement.id;
-  taskButton.textContent = getWindowTitle(windowElement);
-  taskButton.addEventListener("click", () => {
-    if (!windowElement.classList.contains("is-open")) {
-      windowElement.classList.add("is-open");
-      focusWindow(windowElement);
-      return;
-    }
+      function openWindow(windowElement) {
+        windowElement.classList.add("is-open");
+        createTaskButton(windowElement);
+        focusWindow(windowElement);
+        closeStartMenu();
+      }
 
-    if (windowElement.classList.contains("is-active")) {
-      minimizeWindow(windowElement);
-    } else {
-      focusWindow(windowElement);
-    }
-  });
+      function closeWindow(windowElement) {
+        windowElement.classList.remove("is-open", "is-active");
+        taskButtons
+          .querySelector(`[data-target="${windowElement.id}"]`)
+          ?.remove();
+      }
 
-  taskButtons.appendChild(taskButton);
-}
+      function minimizeWindow(windowElement) {
+        windowElement.classList.remove("is-open", "is-active");
+        taskButtons
+          .querySelector(`[data-target="${windowElement.id}"]`)
+          ?.classList.remove("is-active");
+      }
 
-function openWindow(windowElement) {
-  windowElement.classList.add("is-open");
-  createTaskButton(windowElement);
-  focusWindow(windowElement);
-  closeStartMenu();
-}
+      document.querySelectorAll("[data-open]").forEach((trigger) => {
+        trigger.addEventListener("dblclick", () => {
+          const target = document.getElementById(trigger.dataset.open);
+          if (target) openWindow(target);
+        });
 
-function closeWindow(windowElement) {
-  windowElement.classList.remove("is-open", "is-active");
-  taskButtons.querySelector(`[data-target="${windowElement.id}"]`)?.remove();
-}
+        trigger.addEventListener("click", () => {
+          if (trigger.closest(".start-menu")) {
+            const target = document.getElementById(trigger.dataset.open);
+            if (target) openWindow(target);
+          }
+        });
+      });
 
-function minimizeWindow(windowElement) {
-  windowElement.classList.remove("is-open", "is-active");
-  taskButtons.querySelector(`[data-target="${windowElement.id}"]`)?.classList.remove("is-active");
-}
+      document.querySelectorAll("[data-window]").forEach((windowElement) => {
+        windowElement.addEventListener("mousedown", () =>
+          focusWindow(windowElement),
+        );
 
-document.querySelectorAll("[data-open]").forEach((trigger) => {
-  trigger.addEventListener("dblclick", () => {
-    const target = document.getElementById(trigger.dataset.open);
-    if (target) openWindow(target);
-  });
+        windowElement
+          .querySelector("[data-close]")
+          ?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            closeWindow(windowElement);
+          });
 
-  trigger.addEventListener("click", () => {
-    if (trigger.closest(".start-menu")) {
-      const target = document.getElementById(trigger.dataset.open);
-      if (target) openWindow(target);
-    }
-  });
-});
+        windowElement
+          .querySelector("[data-minimize]")
+          ?.addEventListener("click", (event) => {
+            event.stopPropagation();
+            minimizeWindow(windowElement);
+          });
 
-document.querySelectorAll("[data-window]").forEach((windowElement) => {
-  windowElement.addEventListener("mousedown", () => focusWindow(windowElement));
+        makeDraggable(windowElement);
+      });
 
-  windowElement.querySelector("[data-close]")?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    closeWindow(windowElement);
-  });
+      function makeDraggable(windowElement) {
+        const handle = windowElement.querySelector("[data-drag-handle]");
+        if (!handle) return;
 
-  windowElement.querySelector("[data-minimize]")?.addEventListener("click", (event) => {
-    event.stopPropagation();
-    minimizeWindow(windowElement);
-  });
+        let dragging = false;
+        let offsetX = 0;
+        let offsetY = 0;
 
-  makeDraggable(windowElement);
-});
+        handle.addEventListener("mousedown", (event) => {
+          if (event.target.closest("button")) return;
 
-function makeDraggable(windowElement) {
-  const handle = windowElement.querySelector("[data-drag-handle]");
-  if (!handle) return;
+          dragging = true;
+          const rect = windowElement.getBoundingClientRect();
+          offsetX = event.clientX - rect.left;
+          offsetY = event.clientY - rect.top;
+          focusWindow(windowElement);
+          document.body.style.cursor = "move";
+        });
 
-  let dragging = false;
-  let offsetX = 0;
-  let offsetY = 0;
+        document.addEventListener("mousemove", (event) => {
+          if (!dragging) return;
 
-  handle.addEventListener("mousedown", (event) => {
-    if (event.target.closest("button")) return;
+          const maxLeft =
+            window.innerWidth - Math.min(windowElement.offsetWidth, 150);
+          const maxTop = window.innerHeight - 80;
+          const left = Math.max(0, Math.min(event.clientX - offsetX, maxLeft));
+          const top = Math.max(0, Math.min(event.clientY - offsetY, maxTop));
 
-    dragging = true;
-    const rect = windowElement.getBoundingClientRect();
-    offsetX = event.clientX - rect.left;
-    offsetY = event.clientY - rect.top;
-    focusWindow(windowElement);
-    document.body.style.cursor = "move";
-  });
+          windowElement.style.left = `${left}px`;
+          windowElement.style.top = `${top}px`;
+        });
 
-  document.addEventListener("mousemove", (event) => {
-    if (!dragging) return;
+        document.addEventListener("mouseup", () => {
+          dragging = false;
+          document.body.style.cursor = "";
+        });
+      }
 
-    const maxLeft = window.innerWidth - Math.min(windowElement.offsetWidth, 150);
-    const maxTop = window.innerHeight - 80;
-    const left = Math.max(0, Math.min(event.clientX - offsetX, maxLeft));
-    const top = Math.max(0, Math.min(event.clientY - offsetY, maxTop));
+      diagnoseButton.addEventListener("click", () => {
+        diagnoseResult.textContent =
+          "네트워크 케이블이 연결되어 있지 않습니다.";
+      });
 
-    windowElement.style.left = `${left}px`;
-    windowElement.style.top = `${top}px`;
-  });
+      document.getElementById("searchButton").addEventListener("click", () => {
+        diagnoseResult.textContent =
+          "검색할 수 없습니다. 인터넷 연결을 확인하세요.";
+      });
 
-  document.addEventListener("mouseup", () => {
-    dragging = false;
-    document.body.style.cursor = "";
-  });
-}
+      emptyTrashButton.addEventListener("click", () => {
+        if (!trashFile.hidden) {
+          trashFile.hidden = true;
+          trashMessage.textContent = "휴지통이 비었습니다.";
+        } else {
+          trashMessage.textContent = "삭제할 항목이 없습니다.";
+        }
+      });
 
-diagnoseButton.addEventListener("click", () => {
-  diagnoseResult.textContent = "네트워크 케이블이 연결되어 있지 않습니다.";
-});
+      window.addEventListener("resize", () => {
+        document.querySelectorAll("[data-window]").forEach((windowElement) => {
+          const rect = windowElement.getBoundingClientRect();
+          if (rect.left > window.innerWidth - 120)
+            windowElement.style.left = "20px";
+          if (rect.top > window.innerHeight - 80)
+            windowElement.style.top = "20px";
+        });
+      });
 
-document.getElementById("searchButton").addEventListener("click", () => {
-  diagnoseResult.textContent = "검색할 수 없습니다. 인터넷 연결을 확인하세요.";
-});
-
-emptyTrashButton.addEventListener("click", () => {
-  if (!trashFile.hidden) {
-    trashFile.hidden = true;
-    trashMessage.textContent = "휴지통이 비었습니다.";
-  } else {
-    trashMessage.textContent = "삭제할 항목이 없습니다.";
-  }
-});
-
-window.addEventListener("resize", () => {
-  document.querySelectorAll("[data-window]").forEach((windowElement) => {
-    const rect = windowElement.getBoundingClientRect();
-    if (rect.left > window.innerWidth - 120) windowElement.style.left = "20px";
-    if (rect.top > window.innerHeight - 80) windowElement.style.top = "20px";
-  });
-});
-
-startBootSequence();
-
-  </script>
-</body>
+      startBootSequence();
+    </script>
+  </body>
 </html>
